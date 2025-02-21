@@ -1,0 +1,309 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <Windows.h>
+
+using namespace std;
+
+void setColor(int color) {
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),color);
+}
+
+class User
+{
+public:
+    string name;
+    int userID;
+    string userType;
+    bool isLoggedIn;
+
+    User(string n, int id,string r) {
+        name = n;
+        userID = id;
+        userType = r;
+        isLoggedIn = false;
+    }
+    void login() {
+        isLoggedIn = true;
+        setColor(2);
+        cout << name << " logged in successfully.\n";
+    }
+    void logout() {
+        isLoggedIn = false;
+        setColor(2);
+        cout << name << " logged out successfully.\n";
+    }
+
+};
+
+
+
+class Book
+{
+public:
+    string title, author;
+    int bookID, copies;
+
+    Book(string t, string a, int id, int c) {
+        title = t;
+        author = a;
+        bookID = id;
+        copies = c;
+    }
+};
+
+class Library
+{
+public:
+    vector<Book> books;
+
+    void addBook() {
+        string title, author;
+        int id, copies;
+        setColor(2);
+        cout << "Enter Book title: ";
+        setColor(7);
+        cin.ignore();
+        getline(cin, title);
+        setColor(2);
+        cout << "Enter Book author: ";
+        setColor(7);
+        getline(cin, author);
+        setColor(2);
+        cout << "Enter Book ID: ";
+        setColor(7);
+        cin >> id;
+        setColor(2);
+        cout << "Enter number of copies: ";
+        setColor(7);
+        cin >> copies;
+
+        books.push_back(Book(title, author, id, copies));
+        setColor(2);
+        cout << "Book added successfully: " << title << "\n";
+        setColor(7);
+    }
+
+    void deleteBook(int bookID) {
+        for (auto it = books.begin(); it != books.end(); ++it) {
+            if (it->bookID == bookID) {
+                books.erase(it);
+                setColor(2);
+                cout << "Book deleted successfully!\n";
+                setColor(7);
+                return;
+            }
+        }
+        setColor(2);
+        cout << "Book not found.\n";
+        setColor(7);
+    }
+
+    void displayBooks() {
+        setColor(2);
+        cout << "Available Books:\n";
+        setColor(7);
+        for (auto& book : books) {
+            setColor(2);
+            cout << "ID: " << book.bookID << " | Title: " << book.title
+                << " | Author: " << book.author
+                << " | Copies: " << book.copies << endl;
+            setColor(7);
+        }
+    }
+};
+
+class Transaction
+{
+public:
+    void borrowBook(Library& lib, int bookID) {
+        for (auto& book : lib.books) {
+            if (book.bookID == bookID && book.copies > 0) {
+                book.copies--;
+                setColor(2);
+                cout << "Book borrowed successfully!\n";
+                setColor(7);
+                return;
+            }
+        }
+        setColor(2);
+        cout << "Book not available!\n";
+        setColor(7);
+    }
+
+    void returnBook(Library& lib, int bookID) {
+        for (auto& book : lib.books) {
+            if (book.bookID == bookID) {
+                book.copies++;
+                setColor(2);
+                cout << "Book returned successfully!\n";
+                setColor(7);
+                return;
+            }
+        }
+        setColor(2);
+        cout << "Invalid book ID!\n";
+        setColor(7);
+    }
+};
+
+int main()
+{
+    Library library;
+    Transaction transaction;
+
+    vector<User> users;
+    users.push_back(User("Ahmed", 1, "Student"));
+    users.push_back(User("Ali", 2, "Worker"));
+
+    int userChoice, bookID, userID;
+    string username;
+
+    while (true) {
+        setColor(4);
+        cout << "*"<<endl;
+        setColor(13);
+        cout << "Library Management System\n";
+        setColor(4);
+        cout << "*" << endl;
+        setColor(3);
+        cout << "1. Register User\n";
+        cout << "2. Login\n";
+        cout << "3. Logout\n";
+        cout << "4. Display Books\n";
+        cout << "5. Borrow Book\n";
+        cout << "6. Return Book\n";
+        cout << "7. Add Book (Worker only)\n";
+        cout << "8. Delete Book (Worker only)\n";
+        setColor(4);
+        cout << "9. Exit\n";
+        setColor(4);
+        cout << "*" << endl;
+        setColor(2);
+        cout << "Enter your choice: ";
+        setColor(7);
+        cin >> userChoice;
+        setColor(4);
+        cout << "*" << endl;
+        setColor(7);
+        string type;
+
+        switch (userChoice) {
+        case 1:
+            setColor(2);
+            cout << "Enter username: ";
+            setColor(7);
+            cin >> username;
+            setColor(2);
+            cout << "Enter userID: ";
+            setColor(7);
+            cin >> userID;
+            setColor(2);
+            cout << "Enter user type (Student/Worker): ";
+            setColor(7);
+            cin >> type;
+            users.push_back(User(username, userID, type));
+            setColor(2);
+            cout << "User registered successfully!\n";
+            break;
+
+        case 2:
+            setColor(2);
+            cout << "Enter username: ";
+            setColor(7);
+            cin >> username;
+            for (auto& user : users) {
+                if (user.name == username) {
+                    user.login();
+                    break;
+                }
+            }
+            break;
+
+        case 3:
+            setColor(2);
+            cout << "Enter username to logout: ";
+            setColor(7);
+            cin >> username;
+            for (auto& user : users) {
+                if (user.name == username) {
+                    user.logout();
+                    break;
+                }
+            }
+            break;
+        case 4:
+            library.displayBooks();
+            break;
+
+        case 5:
+            setColor(2);
+            cout << "Enter Book ID to borrow: ";
+            setColor(7);
+            cin >> bookID;
+            transaction.borrowBook(library, bookID);
+            break;
+
+        case 6:
+            setColor(2);
+            cout << "Enter Book ID to return: ";
+            setColor(7);
+            cin >> bookID;
+            transaction.returnBook(library, bookID);
+            break;
+
+
+        case 7:
+            setColor(2);
+            cout << "Enter your username: ";
+            setColor(7);
+            cin >> username;
+
+            for (auto& user : users) {
+                if (user.name == username && user.userType == "Worker" && user.isLoggedIn) {
+                    library.addBook();
+                    break;
+                }
+                else if (user.name == username && user.userType != "Worker") {
+                    setColor(4);
+                    cout << "Only workers can add books.\n";
+                    break;
+                }
+                else if (user.name == username && !user.isLoggedIn) {
+                    setColor(4);
+                    cout << "Please log in first.\n";
+                    break;
+                }
+            }
+            break;
+
+
+
+        case 8:
+            setColor(4);
+            cout << "Enter Book ID to delete: ";
+            setColor(7);
+            cin >> bookID;
+            for (auto& user : users) {
+                if (user.userType == "Worker" && user.isLoggedIn) {
+                    library.deleteBook(bookID);
+                    break;
+
+                }
+            }
+            break;
+
+        case 9:
+            setColor(4);
+            cout << "Exiting...\n";
+            return 0;
+
+        default:
+            setColor(4);
+            cout << "Invalid choice!\n";
+        }
+    }
+
+    return 0;
+
+}
